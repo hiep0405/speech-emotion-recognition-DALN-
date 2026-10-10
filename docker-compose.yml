@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # Service 1: Tiến trình Huấn luyện Mô hình SER (Chạy GPU RTX 3060)
+  # ----------------------------------------------------------------------------
+  ser-trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ser-wav2vec2-rtx3060:latest
+    container_name: ser_wav2vec2_trainer
+    restart: unless-stopped
+    shm_size: '8gb'  # Ngăn chặn lỗi PyTorch DataLoader Shared Memory OOM
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+    env_file:
+      - .env
+    volumes:
+      - ./data:/workspace/data
+      - ./checkpoints:/workspace/checkpoints
+      - ./logs:/workspace/logs
+      - ./results:/workspace/results
+      - ./extracted_finetuned_features:/workspace/extracted_finetuned_features
+      - hf_cache:/root/.cache/huggingface  # Không phải tải lại model nặng 1.2GB khi restart
+    ports:
+      - "8000:8000"  # GitHub Webhook listener
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: ["train"]
+
+  # ----------------------------------------------------------------------------
+  # Service 2: Máy chủ Giám sát Trực quan TensorBoard (Xem đồ thị Realtime)
+  # ----------------------------------------------------------------------------
+  tensorboard:
+    image: ser-wav2vec2-rtx3060:latest
+    container_name: ser_tensorboard
+    restart: unless-stopped
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./logs:/workspace/logs
+    command: ["tensorboard", "--logdir=/workspace/logs", "--host=0.0.0.0", "--port=6006"]
+    depends_on:
+      - ser-trainer
+
+  # ----------------------------------------------------------------------------
+  # Service 3: Trình Giám sát Tự động Cập nhật Code GitHub (Auto-Sync & Retrain)
+  # Khởi chạy bằng lệnh: docker compose --profile auto up -d
+  # ----------------------------------------------------------------------------
+  auto-watcher:
+    image: ser-wav2vec2-rtx3060:latest
+    container_name: ser_git_watcher
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - .:/workspace
+      - ./checkpoints:/workspace/checkpoints
+      - ./logs:/workspace/logs
+      - hf_cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: ["watch"]
+    profiles:
+      - auto
+
+volumes:
+  hf_cache:
+    name: ser_huggingface_cache

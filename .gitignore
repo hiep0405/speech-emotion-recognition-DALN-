@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cuda & Distribution
+*.so
+
+# Packages & Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Model Checkpoints & Trọng số nặng (Không đẩy lên GitHub)
+checkpoints/
+*.pt
+*.pth
+*.bin
+*.onnx
+
+# Dữ liệu âm thanh lớn
+data/wav/
+*.wav
+*.mp3
+*.flac
+*.m4a
+IEMOCAP_full_release/
+
+# Logs & Monitoring
+logs/
+results/
+extracted_finetuned_features/
+wandb/
+.cache/
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

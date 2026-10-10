@@ -1,0 +1,17 @@
+# Requirements cho Module Fine-tuning Wav2Vec 2.0 (Hỗ trợ Docker & RTX 3060)
+torch>=2.0.0
+torchaudio>=2.0.0
+transformers>=4.30.0
+soundfile>=0.12.1
+scikit-learn>=1.2.0
+numpy>=1.23.0
+tqdm>=4.65.0
+
+# Giám sát phần cứng & Tối ưu RTX 3060 (Chống quá nhiệt, đo VRAM)
+pynvml>=11.5.0
+python-dotenv>=1.0.0
+
+# Giám sát từ xa (TensorBoard, Weights & Biases, Telegram Bot)
+tensorboard>=2.14.0
+wandb>=0.16.0
+requests>=2.28.0
