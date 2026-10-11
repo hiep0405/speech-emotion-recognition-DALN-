@@ -42,6 +42,7 @@ wandb/
 # IDE & OS
 .idea/
 .vscode/
+.github/
 *.swp
 .DS_Store
 Thumbs.db
