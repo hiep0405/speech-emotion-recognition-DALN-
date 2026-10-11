@@ -32,6 +32,7 @@ data/wav/
 IEMOCAP_full_release/
 
 # Logs & Monitoring
+*.log
 logs/
 results/
 extracted_finetuned_features/
